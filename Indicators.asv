@@ -31,8 +31,6 @@ plot(datas.date(14:end-1), stochasticOscillator, datas.date(14:end-1), simpleMov
 datetick('x', 'dd-mm', 'keepticks');
 title('Stochastic Oscillator - EURUSD July-September 2016');
 legend('Stochastic Oscillator', 'SMA')
-set(gca,'XTickLabel',['1  ';'100'])
-
 %% Accumulation distribution line // Cumulative Money Flow Line
  % 1. Money Flow Multiplier = [(Close  -  Low) - (High - Close)] /(High - Low) 
  % 2. Money Flow Volume = Money Flow Multiplier x Volume for the Period
@@ -60,8 +58,57 @@ set(gca,'XTickLabel',['1  ';'100'])
  datetick('x', 'dd-mm', 'keepticks'); grid on;
  title('Accumulation distribution line - EURUSD August 2016');
  legend('Accumulation distribution line')
+ %%
+ %Envelopes
+ %Upper Envelope: 20-day SMA + (20-day SMA x .025)
+ %Lower Envelope: 20-day SMA - (20-day SMA x .025)
  
+ datas = readData('EURUSD_0701_0930.csv');
  
+ for i = 1:46
+     SMA(i) = mean(datas.close(1+i:20+i)); 
+ end
+ 
+ for i = 1:46
+     UpperEnvelope(i) = SMA(i) + (SMA(i) * 0.025);
+     LowerEnvelope(i) = SMA(i) - (SMA(i) * 0.025);
+ end
+ 
+ figure(3)
+ h = plot(datas.date(21:66), SMA, 'Linewidth', 2, datas.date(21:66), UpperEnvelope, 'Linewidth', 2, datas.date(21:66), LowerEnvelope, 'Linewidth', 2)
+ datetick('x', 'dd-mm', 'keepticks'); grid on;
+ title('Moving average envelopes- EURUSD August-September 2016');
+ legend('SimpleMovingAverage', 'UpperEnvelope', 'LowerEnvelope')
+ 
+
+ 
+ %%
+ %Williams percent range // %R
+ %R = (Highest High - Close)/(Highest High - Lowest Low) * -100
+%Lowest Low = lowest low for the look-back period
+%Highest High = highest high for the look-back period
+%R is multiplied by -100 correct the inversion and move the decimal.
+
+datas = readData('EURUSD_0701_0930.csv');
+highestHighs = 1:66;
+lowestLows   = 1:66;
+currentClose = datas.close(14:end); % kokiu periodu atgal ziuresime = 14
+WilliamsR = 1:52;
+
+for i = 1:52
+    highestHighs(i) = max(datas.high(0+i:13+i));
+    lowestLows(i) = min(datas.low(0+i:13+i));
+end
+
+for i = 1:52
+    WilliamsR(i) = (highestHighs(i) - currentClose(i))/(highestHighs(i) - lowestLows(i)) * -100;
+end
+figure(4)
+plot(datas.date(14:end-1), WilliamsR, 'LineWidth', 1);grid on;
+datetick('x', 'dd-mm', 'keepticks');
+title('WilliamsR - EURUSD July-September 2016');
+legend('WilliamsR')
+
 %% Chaikin Oscillator
  % Chaikin Oscillator = (3-day EMA of ADL)  -  (10-day EMA of ADL)	
 
